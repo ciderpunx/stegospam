@@ -12,6 +12,10 @@ use Readonly;
 Readonly my $MIN_SENTENCE => 3; # minimum sentence length
 Readonly my $MAX_SENTENCE => 8; # maximum sentence length
 Readonly my $DEBUG        => 0; # switch on debugging output
+Readonly my $GAUSS_PRECISION => 5;			# closeness to standard distribution of sentence lengths
+Readonly my $PARAGRAPHINESS  => 9;			# Sentences whose lengths are divisible by this trigger 
+																				# a para break afterwords (higher means fewer paras)
+Readonly my $PARAGRAPH_BREAK => "\n\n"; # string to use to break paras
 
 ## Probably don't want to change stuff from here onwards
 Readonly my $USAGE => "$0 [-d|-e] < file.txt: use spam to transmit data from file.txt steganogrpahically";
@@ -49,7 +53,7 @@ sub bin2spam {
 		my $sentence = find_sentence_from_parity_map($chunk);
 		die "Unsupported parity map for sentence ($chunk). You probably need a bigger corpus." unless($sentence);
 		$spam .= "$sentence ";
-		if ((length $sentence) % 9 == 0) {$spam .= "\n\n"}
+		$spam .= $PARAGRAPH_BREAK if ((length $sentence) % $PARAGRAPHINESS == 0);
 	}
 	warn $spam if $DEBUG;
 	warn join '',@chunks, ' bin2spam' if $DEBUG;
@@ -98,7 +102,7 @@ sub get_chunk_offests {
   my $words_accounted_for=0;
   my @chunk_offsets;
  	while ($words_accounted_for < $text_length) {
-		my $x = $MIN_SENTENCE + gauss_rands(($MAX_SENTENCE-$MIN_SENTENCE),5); 
+		my $x = $MIN_SENTENCE + gauss_rands(($MAX_SENTENCE-$MIN_SENTENCE),$GAUSS_PRECISION); 
 		if ($words_accounted_for + $x <= $text_length) {
 			push @chunk_offsets, $x;
 			$words_accounted_for += $x;
@@ -177,8 +181,9 @@ as parameters.
 any work on this, but examining your corpus and splitting your message into seperate chunks (mailed at 
 different times from different accounts) may be an option. 
 * We strip out unusual characters and regularize spacing during corpus import into database, again leading 
-to possible statistical analysis, similarly we insert paragraphs in a predictable manner.
-
+to possible statistical analysis. Similarly we insert paragraphs in a predictable manner. However, there is
+a customizable PARAGRAPHINESS factor that allows you to control the likliehood that a paragraph appears, 
+which might help. Or not. 
 
 =head1 REQUIREMENTS
 

@@ -99,9 +99,4 @@ DBD::SQLite3
  Boston, MA  02111-1307, USA.
  Also available on line: http://www.gnu.org/copyleft/gpl.html
 
-=head1 SEE ALSO
-
-____________________________
-
 =cut
-
